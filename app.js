@@ -10,6 +10,7 @@ require('dotenv').config();
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/UserRouter');
 var foreignRouter=require('./routes/ForeignRouter');
+var uploadRouter=require('./routes/uploadRouter');
 
 const url=process.env.MONGO_URL;
 
@@ -36,6 +37,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/locupdate',foreignRouter);
+app.use('/imageupload',uploadRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

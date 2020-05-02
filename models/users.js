@@ -2,6 +2,15 @@ const mongoose=require('mongoose');
 
 var Schema=mongoose.Schema;
 
+const Home=new Schema({
+    latitude:{
+        type:Number
+    },
+    longitude:{
+        type:Number
+    }
+});
+
 const User=new Schema({
     googleId:{
         type:String,
@@ -34,7 +43,8 @@ const User=new Schema({
     profile_pic:{
         type:String,
         required:false
-    }
+    },
+    home_location:Home
 },{
     timestamps:true
 });
