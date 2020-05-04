@@ -8,7 +8,6 @@ var oauth2Client=new oauth2();
 const fetch=require('node-fetch');
 const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client(process.env.CLIENT_ID);
-const fetch=require('node-fetch');
 
 /* GET users listing. */
 
