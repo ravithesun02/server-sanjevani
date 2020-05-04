@@ -11,6 +11,25 @@ const Home=new Schema({
     }
 });
 
+const Address=new Schema({
+    state:{
+        type:String
+    },
+    country:{
+        type:String
+    },
+    district:{
+        type:String
+    },
+    full_add:{
+        type:String
+    },
+    state_code:{
+        type:String
+    }
+
+});
+
 const User=new Schema({
     googleId:{
         type:String,
@@ -44,7 +63,8 @@ const User=new Schema({
         type:String,
         required:false
     },
-    home_location:Home
+    home_location:Home,
+    address:Address
 },{
     timestamps:true
 });

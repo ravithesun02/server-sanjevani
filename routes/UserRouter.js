@@ -8,6 +8,7 @@ var oauth2Client=new oauth2();
 const fetch=require('node-fetch');
 const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client(process.env.CLIENT_ID);
+const fetch=require('node-fetch');
 
 /* GET users listing. */
 
@@ -76,8 +77,30 @@ UserRouter.route('/login')
 })
 
 .put(authenticate.verifyUser,(req,res,next)=>{
+  if(req.body.home_location.longitude)
+    {
+      fetch(`https://api.opencagedata.com/geocode/v1/json?q=${req.body.home_location.latitude}+${req.body.home_location.longitude}&key=7a38a82ec3ad4b33a43514cd8254b437`)
+      .then(response=>{
+        if(response.ok)
+          return response;
+        else
+        {
+          var err=new Error(response.message);
+        }
+      })
+      .then((response)=>response.json())
+      .then((data)=>{
+        req.body.address.state=data.results[0].components.state;
+        req.body.address.country=data.results[0].components.country;
+        req.body.address.district=data.results[0].components.state_district;
+        req.body.address.full_add=data.results[0].formatted;
+        req.body.address.state_code=data.results[0].components.state_code;
+      })
+      .catch((err)=>{console.log(err)});
+    }
   User.findByIdAndUpdate({_id:req.user._id},req.body,{new : true})
   .then((user)=>{
+    
     res.statusCode=200;
     res.setHeader('Content-Type','application/json');
     res.json({status:'success',user:user});
