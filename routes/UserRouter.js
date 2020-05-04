@@ -8,8 +8,12 @@ var oauth2Client=new oauth2();
 const fetch=require('node-fetch');
 const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client(process.env.CLIENT_ID);
+const bodyparser=require('body-parser');
 
 /* GET users listing. */
+
+
+UserRouter.use(bodyparser.json());
 
 UserRouter.route('/login')
 .get(authenticate.verifyUser,(req,res,next)=>{
@@ -76,6 +80,7 @@ UserRouter.route('/login')
 })
 
 .put(authenticate.verifyUser,(req,res,next)=>{
+  //console.log(req.body.home_location);
   if(req.body.home_location.longitude)
     {
       fetch(`https://api.opencagedata.com/geocode/v1/json?q=${req.body.home_location.latitude}+${req.body.home_location.longitude}&key=7a38a82ec3ad4b33a43514cd8254b437`)
@@ -89,22 +94,39 @@ UserRouter.route('/login')
       })
       .then((response)=>response.json())
       .then((data)=>{
-        req.body.address.state=data.results[0].components.state;
-        req.body.address.country=data.results[0].components.country;
-        req.body.address.district=data.results[0].components.state_district;
-        req.body.address.full_add=data.results[0].formatted;
-        req.body.address.state_code=data.results[0].components.state_code;
+       // console.log(data);
+        let addressData={
+          state:data.results[0].components.state,
+          country:data.results[0].components.country,
+          district:data.results[0].components.state_district,
+          full_add:data.results[0].formatted,
+          state_code:data.results[0].components.state_code
+        };
+        req.body.address=addressData;
+      //  console.log(req.body);
+      User.findByIdAndUpdate({_id:req.user._id},req.body,{new : true})
+      .then((user)=>{
+       // console.log(req.body);
+        res.statusCode=200;
+        res.setHeader('Content-Type','application/json');
+        res.json({status:'success',user:user});
+      },(err)=>console.log(err))
+      .catch((err)=>next(err))
       })
       .catch((err)=>{console.log(err)});
     }
-  User.findByIdAndUpdate({_id:req.user._id},req.body,{new : true})
-  .then((user)=>{
-    
-    res.statusCode=200;
-    res.setHeader('Content-Type','application/json');
-    res.json({status:'success',user:user});
-  },(err)=>console.log(err))
-  .catch((err)=>next(err))
+    else
+    {
+      User.findByIdAndUpdate({_id:req.user._id},req.body,{new : true})
+      .then((user)=>{
+       // console.log(req.body);
+        res.statusCode=200;
+        res.setHeader('Content-Type','application/json');
+        res.json({status:'success',user:user});
+      },(err)=>console.log(err))
+      .catch((err)=>next(err))
+    }
+
   
 })
 
