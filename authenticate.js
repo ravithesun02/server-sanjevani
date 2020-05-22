@@ -23,29 +23,30 @@ opts.jwtFromRequest=ExtractJwt.fromAuthHeaderAsBearerToken() ;
 opts.secretOrKey=process.env.SECRET_KEY;
 
 exports.jwtPassport=passport.use(new jwtStrategy(opts,(jwt_payload,done)=>{
-    console.log(jwt_payload);
-    if(jwt_payload.googleId)
-    {
+   // console.log(jwt_payload);
         User.findOne({_id:jwt_payload._id},(err,user)=>{  
             if(err)
+            { 
+                Admin.findOne({_id:jwt_payload._id},(err,user)=>{
+                    if(err)
+                        return done(err,false);
+                    else if(user)
+                        return done(null,user);
+                    else
+                        return done(null,null);
+                });
+                
                 return done(err,false);
+            }
             else if(user)
                 return done(null,user);
             else
                 return done(null,null);
         });
-    }
-    else
-    {
-        Admin.findOne({_id:jwt_payload._id},(err,user)=>{
-            if(err)
-                return done(err,false);
-            else if(user)
-                return done(null,user);
-            else
-                return done(null,null);
-        });
-    }
+    
+   
+      
+    
  
 }));
 
