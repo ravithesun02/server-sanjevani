@@ -3,11 +3,14 @@ var User=require('./models/users');
 var jwtStrategy=require('passport-jwt').Strategy;
 var ExtractJwt=require('passport-jwt').ExtractJwt;
 var jwt=require('jsonwebtoken');
-
+var LocalStrategy=require('passport-local').Strategy;
+var Admin=require('./models/admin');
 require('dotenv').config();
 
 
-
+exports.local = passport.use(new LocalStrategy(Admin.authenticate()));
+passport.serializeUser(Admin.serializeUser());
+passport.deserializeUser(Admin.deserializeUser());
 
 exports.getToken=function(user){
     return jwt.sign(user,process.env.SECRET_KEY,{expiresIn:'12000000 days'});
@@ -71,6 +74,3 @@ exports.verifyMainAdmin=(req,res,next)=>{
         next(err);
     }
 }
-
-
-
