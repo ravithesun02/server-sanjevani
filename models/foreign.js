@@ -20,6 +20,13 @@ const Foreign=new Schema({
         type:Number,
         required:true
     },
+    state:{
+        type:String,
+        required:true
+    },
+    district:{
+        type:String
+    },
     current_timestamp:{
         type:Number,
         required:true

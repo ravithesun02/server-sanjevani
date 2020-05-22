@@ -6,11 +6,21 @@ var Foreign=require('../models/foreign');
 const fetch=require('node-fetch');
 
 ForeignRouter.route('/foreign')
-.get(authenticate.verifyUser,(req,res)=>{
+.get(authenticate.verifyUser,authenticate.verifyMainAdmin,(req,res)=>{
+
+    Foreign.find({})
+    .then((data)=>{
+        res.statusCode=200;
+        res.setHeader('Content-Type','application/json');
+        res.json({status:0,data:data});
+    })
+    .catch((error)=>console.log(error))
 
 })
 .post(authenticate.verifyUser,(req,res,next)=>{
     req.body.googleId=req.user.googleId;
+    req.body.district=req.user.address.district || '';
+    req.body.state=req.user.address.state;
    Foreign.create(req.body)
    .then((location)=>{
        res.statusCode=200;

@@ -7,12 +7,16 @@
 var app = require('../app');
 var debug = require('debug')('server-sanjevani:server');
 var http = require('http');
-
+var SocketIo=require('socket.io');
+var cors=require('cors');
+var jwtAuth=require('socketio-jwt-auth');
+var Admin=require('../models/admin');
+var Foreign=require('../models/foreign');
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '5000');
+var port = normalizePort(process.env.PORT || '5200');
 app.set('port', port);
 
 /**
@@ -20,6 +24,99 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+
+
+
+const io=SocketIo(server,{
+  handlePreflightRequest: (req, res) => {
+      const headers = {
+          "Access-Control-Allow-Headers": "Content-Type, Authorization,x-auth-token",
+          "Access-Control-Allow-Origin": req.headers.origin, //or the specific origin you want to give access to,
+          "Access-Control-Allow-Credentials": true
+      };
+      res.writeHead(200, headers);
+      res.end();
+  }
+});
+
+
+
+
+
+io.use(jwtAuth.authenticate({
+  secret:process.env.SECRET_KEY
+},function(payload,done){
+console.log(payload);
+  if(payload )
+  {
+
+
+  Admin.findOne({_id:payload._id},function(err,user){
+    if(err)
+        return done(err);
+    if(!user)
+      return done(null,false,'user does not exist');
+    
+    return done(null,user);
+  });
+
+}
+
+else
+{
+  return done();
+}
+
+}));
+
+
+let interval;
+
+
+
+io.on("connection",(socket) => {
+  console.log("New client connected");
+  console.log(socket.request.user);
+  if (interval) {
+    clearInterval(interval);
+  }
+  interval = setInterval(() => getApiAndEmit(socket), 1000);
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+    clearInterval(interval); 
+  });
+});
+
+
+const getForeignData=(socket)=>{
+
+let res=[];
+
+Foreign.find({'district':socket.request.user.district,'state':socket.request.user.state})
+.then((data)=>{
+  res=data;
+
+  socket.emit("FromAPI", res);
+  console.log(res);
+})
+.catch((error)=>console.log(error));
+
+}
+
+const getApiAndEmit = async (socket) => {
+
+  let response=new Array();
+
+  console.log('entered');
+
+ response=await getForeignData(socket);
+
+ console.log('returned');
+
+  console.log(response);
+
+  // socket.emit("FromAPI", response);
+};
 
 /**
  * Listen on provided port, on all network interfaces.

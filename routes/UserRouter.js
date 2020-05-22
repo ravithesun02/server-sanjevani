@@ -128,6 +128,18 @@ UserRouter.route('/login')
     }
 
   
+});
+
+UserRouter.route('/detail/admin/:googleId')
+.get(authenticate.verifyUser,authenticate.verifyMainAdmin,(req,res,next)=>{
+  User.find({'googleId':req.params.googleId})
+  .then((user)=>{
+    res.statusCode=200;
+    res.setHeader('Content-Type','application/json');
+    res.json({status:'success',user:user});
+
+  })
+  .catch((error)=>next(error));
 })
 
 
