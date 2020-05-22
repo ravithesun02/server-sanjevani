@@ -22,30 +22,41 @@ var opts={};
 opts.jwtFromRequest=ExtractJwt.fromAuthHeaderAsBearerToken() ;
 opts.secretOrKey=process.env.SECRET_KEY;
 
-exports.jwtPassport=passport.use(new jwtStrategy(opts,(jwt_payload,done)=>{
+exports.jwtPassport=passport.use(new jwtStrategy(opts, async (jwt_payload,done)=>{
     console.log(jwt_payload);
-    if(jwt_payload.googleId)
-    {
+
+  const res=await User.findById(jwt_payload._id);
+  const resp=await Admin.findById(jwt_payload._id);
+  if(res!=null)
+  {
+
         User.findOne({_id:jwt_payload._id},(err,user)=>{  
             if(err)
-                return done(err,false);
+            { 
+                 return done(err,false);
+            }
             else if(user)
                 return done(null,user);
             else
                 return done(null,null);
         });
-    }
-    else
-    {
-        Admin.findOne({_id:jwt_payload._id},(err,user)=>{
-            if(err)
-                return done(err,false);
-            else if(user)
-                return done(null,user);
-            else
-                return done(null,null);
-        });
-    }
+
+  }
+  else if(resp!=null)
+  {
+    Admin.findOne({_id:jwt_payload._id},(err,user)=>{
+        if(err)
+            return done(err,false);
+        else if(user)
+            return done(null,user);
+        else
+            return done(null,null);
+    });
+  }
+  else
+  return done(null,null);
+ 
+   
  
 }));
 
