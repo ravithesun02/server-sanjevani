@@ -19,8 +19,8 @@ ForeignRouter.route('/foreign')
 })
 .post(authenticate.verifyUser,(req,res,next)=>{
     req.body.googleId=req.user.googleId;
-    req.body.district=req.user.address.district || '';
-    req.body.state=req.user.address.state;
+    req.body.district=req.user.address.district.toLowerCase() || '';
+    req.body.state=req.user.address.state.toLowerCase();
    Foreign.create(req.body)
    .then((location)=>{
        res.statusCode=200;
