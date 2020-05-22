@@ -9,6 +9,7 @@ const fetch=require('node-fetch');
 const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client(process.env.CLIENT_ID);
 const bodyparser=require('body-parser');
+var authenticateAdmin=require('../authenticateAdmin');
 
 /* GET users listing. */
 
@@ -131,7 +132,7 @@ UserRouter.route('/login')
 });
 
 UserRouter.route('/detail/admin/:googleId')
-.get(authenticate.verifyUser,authenticate.verifyMainAdmin,(req,res,next)=>{
+.get(authenticateAdmin.verifyUser,authenticateAdmin.verifyMainAdmin,(req,res,next)=>{
   User.find({'googleId':req.params.googleId})
   .then((user)=>{
     res.statusCode=200;

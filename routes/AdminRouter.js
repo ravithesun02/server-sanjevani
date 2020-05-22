@@ -1,5 +1,5 @@
 var express=require('express');
-var authenticate=require('../authenticate');
+var authenticateAdmin=require('../authenticate');
 var Admin=require('../models/admin');
 var passport=require('passport');
 var bodyparser=require('body-parser');
@@ -64,7 +64,7 @@ AdminRouter.route('/signup')
 
 AdminRouter.route('/login')
 .post(cors.corsWithOptions,passport.authenticate('local'),(req,res)=>{
-    let token=authenticate.getToken({_id:req.user._id});
+    let token=authenticateAdmin.getToken({_id:req.user._id});
 
     res.statusCode=200;
     res.setHeader('Content-Type','application/json');
